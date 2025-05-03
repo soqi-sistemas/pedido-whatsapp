@@ -129,7 +129,7 @@
 
 <script>
   async function verificarStatusPedidos() {
-    const res = await fetch('/painel-delivery/status_pedidos.php');
+    const res = await fetch('https://pedidosw.soqi.com.br/api/produtos.php');
     const data = await res.json();
     if (!data.ativo) {
       alert("Os pedidos estão temporariamente desativados.");
