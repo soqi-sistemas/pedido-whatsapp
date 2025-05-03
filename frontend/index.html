@@ -10,7 +10,13 @@
   <header>
     <h1>Cardápio</h1>
   </header>
-
+<div id="filtro-categorias" style="display: flex; gap: 10px; margin-bottom: 20px;">
+  <button onclick="filtrarProdutos('todos')">Todos</button>
+  <button onclick="filtrarProdutos('pizza')">Pizzas</button>
+  <button onclick="filtrarProdutos('lanche')">Lanches</button>
+  <button onclick="filtrarProdutos('porcao')">Porções</button>
+  <button onclick="filtrarProdutos('refrigerante')">Refrigerantes</button>
+</div>
   <main id="produtos" class="container"></main>
 
   <script>
