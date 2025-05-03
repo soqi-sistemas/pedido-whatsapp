@@ -1,7 +1,7 @@
 <?php
 // supabase.php
-define('SUPABASE_URL', 'https://SEU_PROJETO.supabase.co');
-define('SUPABASE_KEY', 'SUA_ANON_KEY');
+define('SUPABASE_URL', 'https://isauvpkojbjyxdaxefoz.supabase.co');
+define('SUPABASE_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYXV2cGtvamJqeXhkYXhlZm96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYyOTMzODIsImV4cCI6MjA2MTg2OTM4Mn0.MS54KRfmR_m7q5qDkoq48uuPkAAzlTFYVaBazXIyF1g');
 
 function supabase_get_produtos() {
     $url = SUPABASE_URL . "/rest/v1/produtos?select=*";
