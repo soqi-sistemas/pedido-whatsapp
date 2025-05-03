@@ -1,39 +1,102 @@
-
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Cardápio</title>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cardápio</title>
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-    <header>
-        <h1>Faça seu Pedido</h1>
-        <div id="filtros">
-            <button onclick="filtrarCategoria('tudo')">Todos</button>
-            <button onclick="filtrarCategoria('pizza')">Pizzas</button>
-            <button onclick="filtrarCategoria('lanche')">Lanches</button>
-            <button onclick="filtrarCategoria('porcao')">Porções</button>
-            <button onclick="filtrarCategoria('bebida')">Bebidas</button>
+  <header>
+    <h1>Cardápio</h1>
+    <div id="categorias"></div>
+  </header>
+
+  <main>
+    <div id="produtos" class="produtos"></div>
+  </main>
+
+  <aside id="carrinho-container">
+    <h2>Carrinho</h2>
+    <ul id="carrinho"></ul>
+    <p>Total: R$ <span id="total">0.00</span></p>
+    <button onclick="enviarPedidoWhatsApp()">Enviar Pedido</button>
+  </aside>
+
+  <script>
+    const API_URL = 'https://pedidosw.soqi.com.br/api/produtos.php';
+    let todosProdutos = [];
+    let carrinho = [];
+
+    async function carregarProdutos() {
+      try {
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error("Erro ao buscar produtos.");
+        todosProdutos = await res.json();
+        renderizarCategorias();
+        exibirProdutos(todosProdutos);
+      } catch (e) {
+        console.error(e);
+        document.getElementById('produtos').innerHTML = '<p>Erro ao carregar produtos.</p>';
+      }
+    }
+
+    function renderizarCategorias() {
+      const categorias = [...new Set(todosProdutos.map(p => p.categoria))];
+      const container = document.getElementById('categorias');
+      container.innerHTML = '<button onclick="exibirProdutos(todosProdutos)">Todos</button>' +
+        categorias.map(cat => `<button onclick="filtrarCategoria('${cat}')">${cat}</button>`).join('');
+    }
+
+    function filtrarCategoria(cat) {
+      const filtrados = todosProdutos.filter(p => p.categoria === cat);
+      exibirProdutos(filtrados);
+    }
+
+    function exibirProdutos(produtos) {
+      const container = document.getElementById('produtos');
+      container.innerHTML = produtos.map(p => `
+        <div class="produto">
+          <img src="${p.imagem}" alt="${p.nome}" />
+          <h3>${p.nome}</h3>
+          <p>Sabor: ${p.sabores || '-'}</p>
+          <p>Preço: R$ ${p.preco}</p>
+          <button onclick='adicionarAoCarrinho(${JSON.stringify(p)})'>Adicionar</button>
         </div>
-    </header>
-    <main>
-        <section id="produtos"></section>
-        <script>
-            fetch('https://pedidosw.soqi.com.br/api/produtos.php')
-  .then(response => response.json())
-  .then(data => {
-    console.log(data);
-    // processar produtos
-  });
-        </script>
-        <aside id="carrinho">
-            <h2>Carrinho</h2>
-            <ul id="lista-carrinho"></ul>
-            <p>Total: R$ <span id="total">0.00</span></p>
-            <button onclick="enviarPedido()">Enviar Pedido</button>
-        </aside>
-    </main>
-    <script src="js/app.js"></script>
+      `).join('');
+    }
+
+    function adicionarAoCarrinho(produto) {
+      carrinho.push(produto);
+      atualizarCarrinho();
+    }
+
+    function atualizarCarrinho() {
+      const lista = document.getElementById('carrinho');
+      lista.innerHTML = carrinho.map((item, i) => `
+        <li>
+          ${item.nome} - R$ ${item.preco} <button onclick="removerCarrinho(${i})">Remover</button>
+        </li>
+      `).join('');
+
+      const total = carrinho.reduce((acc, cur) => acc + Number(cur.preco), 0);
+      document.getElementById('total').textContent = total.toFixed(2);
+    }
+
+    function removerCarrinho(index) {
+      carrinho.splice(index, 1);
+      atualizarCarrinho();
+    }
+
+    function enviarPedidoWhatsApp() {
+      if (carrinho.length === 0) return alert("Carrinho vazio");
+      let texto = carrinho.map(item => `- ${item.nome} (R$ ${item.preco})`).join('\n');
+      texto += `\nTotal: R$ ${carrinho.reduce((acc, cur) => acc + Number(cur.preco), 0).toFixed(2)}`;
+      const link = `https://wa.me/SEUNUMERO?text=${encodeURIComponent(texto)}`;
+      window.open(link, '_blank');
+    }
+
+    carregarProdutos();
+  </script>
 </body>
 </html>
