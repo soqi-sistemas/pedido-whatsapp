@@ -1,103 +1,32 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cardápio - Pedidos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistema de Pedidos</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
   <header>
     <h1>Cardápio</h1>
   </header>
-<div id="filtro-categorias" style="display: flex; gap: 10px; margin-bottom: 20px;">
-  <button onclick="filtrarProdutos('todos')">Todos</button>
-  <button onclick="filtrarProdutos('pizza')">Pizzas</button>
-  <button onclick="filtrarProdutos('lanche')">Lanches</button>
-  <button onclick="filtrarProdutos('porcao')">Porções</button>
-  <button onclick="filtrarProdutos('refrigerante')">Refrigerantes</button>
-  
-</div>
-  <main id="produtos" class="container"></main>
 
-  <script>
-    async function carregarProdutos() {
-      const resposta = await fetch("https://pedidosw.soqi.com.br/api/produtos.php");
-      const produtos = await resposta.json();
+  <div id="filtro-categorias">
+    <button onclick="filtrarProdutos('todos')">Todos</button>
+    <button onclick="filtrarProdutos('pizza')">Pizzas</button>
+    <button onclick="filtrarProdutos('lanche')">Lanches</button>
+    <button onclick="filtrarProdutos('porcao')">Porções</button>
+    <button onclick="filtrarProdutos('refrigerante')">Refrigerantes</button>
+  </div>
 
-      const container = document.getElementById("produtos");
-      container.innerHTML = "";
+  <main id="lista-produtos"></main>
 
-      produtos.forEach(produto => {
-        const card = document.createElement("div");
-        card.className = "produto";
+  <div id="carrinho">
+    <h2>Carrinho</h2>
+    <ul id="itens-carrinho"></ul>
+    <button onclick="finalizarPedido()">Finalizar Pedido</button>
+  </div>
 
-        card.innerHTML = `
-          <img src="${produto.imagem}" alt="${produto.nome}" class="produto-img" />
-          <h2>${produto.nome}</h2>
-          <p><strong>Categoria:</strong> ${produto.categoria}</p>
-          ${produto.sabores ? `<p><strong>Sabor:</strong> ${produto.sabores}</p>` : ""}
-          ${produto.tamanhos ? `<p><strong>Tamanhos:</strong> ${produto.tamanhos}</p>` : ""}
-          ${produto.precos ? `<p><strong>Outros Preços:</strong> ${produto.precos}</p>` : `<p><strong>Preço:</strong> R$ ${produto.preco}</p>`}
-          <button onclick="adicionarAoCarrinho('${produto.id}')">Adicionar ao carrinho</button>
-        `;
-
-        container.appendChild(card);
-      });
-    }
-
-    function adicionarAoCarrinho(id) {
-      alert("Produto " + id + " adicionado ao carrinho!");
-      // Aqui futuramente entra a lógica para armazenar em localStorage ou enviar para API
-    }
-
-    carregarProdutos();
-  </script>
-
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #f8f8f8;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background: #000;
-      color: #fff;
-      padding: 1rem;
-      text-align: center;
-    }
-    .container {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 1rem;
-      padding: 1rem;
-    }
-    .produto {
-      background: #fff;
-      padding: 1rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      text-align: center;
-    }
-    .produto-img {
-      width: 100%;
-      height: 150px;
-      object-fit: cover;
-      border-radius: 4px;
-    }
-    button {
-      background: #25d366;
-      border: none;
-      color: #fff;
-      padding: 0.5rem 1rem;
-      border-radius: 4px;
-      cursor: pointer;
-      margin-top: 0.5rem;
-    }
-    button:hover {
-      background: #1ea451;
-    }
-  </style>
+  <script src="js/app.js"></script>
 </body>
 </html>
