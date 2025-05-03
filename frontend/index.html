@@ -119,29 +119,30 @@
     }
   }
 
-  function exibirProdutos(categoria = "") {
-    const container = document.getElementById("produtos");
-    container.innerHTML = "";
+ function exibirProdutos(categoria = "") {
+  const container = document.getElementById("produtos-container");
+  container.innerHTML = "";
 
-    const filtrados = categoria ? produtos.filter(p => p.categoria === categoria) : produtos;
+  const filtrados = categoria && categoria !== "todos"
+    ? produtos.filter(p => p.categoria === categoria)
+    : produtos;
 
-    filtrados.forEach(p => {
-      const card = document.createElement("div");
-      card.className = "col-md-4 mb-4";
-      card.innerHTML = `
-        <div class="card h-100">
-          <img src="${p.imagem}" class="card-img-top" style="height: 200px; object-fit: cover;">
-          <div class="card-body">
-            <h5 class="card-title">${p.nome}</h5>
-            <p class="card-text">Sabor: ${p.sabores || "N/A"}</p>
-            <p class="card-text fw-bold">R$ ${p.preco}</p>
-            <button class="btn btn-primary" onclick='adicionarCarrinho(${JSON.stringify(p.id)})'>Adicionar ao pedido</button>
-          </div>
-        </div>
-      `;
-      container.appendChild(card);
-    });
-  }
+  filtrados.forEach(p => {
+    const card = document.createElement("div");
+    card.className = "col-md-4 mb-4";
+    card.innerHTML = `
+      <div class="produto h-100">
+        <img src="${p.imagem}" alt="${p.nome}">
+        <h5 class="mt-2">${p.nome}</h5>
+        <p>Sabor: ${p.sabores || "N/A"}</p>
+        <p class="fw-bold">R$ ${p.preco}</p>
+        <button class="btn btn-add w-100" onclick='adicionarCarrinho("${p.id}")'>Adicionar ao pedido</button>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
 
   function adicionarCarrinho(id) {
     const produto = produtos.find(p => p.id === id);
