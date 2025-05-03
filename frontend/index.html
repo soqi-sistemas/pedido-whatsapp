@@ -19,6 +19,14 @@
     </header>
     <main>
         <section id="produtos"></section>
+        <script>
+            fetch('https://pedidosw.soqi.com.br/api/produtos.php')
+  .then(response => response.json())
+  .then(data => {
+    console.log(data);
+    // processar produtos
+  });
+        </script>
         <aside id="carrinho">
             <h2>Carrinho</h2>
             <ul id="lista-carrinho"></ul>
