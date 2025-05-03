@@ -1,65 +1,75 @@
-let todosProdutos = [];
+
+let produtos = [];
 let carrinho = [];
 
-function carregarProdutos() {
-  fetch('https://pedidosw.soqi.com.br/api/produtos.php')
-    .then(response => response.json())
-    .then(data => {
-      todosProdutos = data;
-      exibirProdutos(data);
-    })
-    .catch(error => console.error('Erro ao carregar produtos:', error));
+async function carregarProdutos() {
+    try {
+        const response = await fetch("https://pedidosw.soqi.com.br/api/produtos.php");
+        const data = await response.json();
+        produtos = data;
+        renderizarProdutos(produtos);
+    } catch (error) {
+        console.error("Erro ao carregar produtos:", error);
+    }
 }
 
-function exibirProdutos(produtos) {
-  const container = document.getElementById('lista-produtos');
-  container.innerHTML = '';
-
-  produtos.forEach(produto => {
-    const card = document.createElement('div');
-    card.classList.add('produto-card');
-    card.innerHTML = `
-      <img src="${produto.imagem}" alt="${produto.nome}" />
-      <h3>${produto.nome}</h3>
-      <p>Preço: R$ ${produto.preco}</p>
-      <p>Sabor: ${produto.sabores ?? '-'}</p>
-      <p>Tamanhos: ${produto.tamanhos ?? '-'}</p>
-      <button onclick='adicionarAoCarrinho(${JSON.stringify(JSON.stringify(produto))})'>Adicionar</button>
-    `;
-    container.appendChild(card);
-  });
+function renderizarProdutos(lista) {
+    const container = document.getElementById("produtos");
+    container.innerHTML = "";
+    lista.forEach(prod => {
+        const card = document.createElement("div");
+        card.className = "produto";
+        card.innerHTML = `
+            <img src="${prod.imagem}" alt="${prod.nome}">
+            <h3>${prod.nome}</h3>
+            <p>${prod.sabores || ""}</p>
+            <p>R$ ${prod.preco}</p>
+            <button onclick='adicionarCarrinho(${JSON.stringify(prod)})'>Adicionar</button>
+        `;
+        container.appendChild(card);
+    });
 }
 
-function filtrarProdutos(categoria) {
-  if (categoria === 'todos') {
-    exibirProdutos(todosProdutos);
-  } else {
-    const filtrados = todosProdutos.filter(p => p.categoria === categoria);
-    exibirProdutos(filtrados);
-  }
-}
-
-function adicionarAoCarrinho(produtoStr) {
-  const produto = JSON.parse(produtoStr);
-  carrinho.push(produto);
-  atualizarCarrinho();
+function adicionarCarrinho(produto) {
+    carrinho.push(produto);
+    atualizarCarrinho();
 }
 
 function atualizarCarrinho() {
-  const lista = document.getElementById('itens-carrinho');
-  lista.innerHTML = '';
-
-  carrinho.forEach((item, index) => {
-    const li = document.createElement('li');
-    li.textContent = `${item.nome} - R$ ${item.preco}`;
-    lista.appendChild(li);
-  });
+    const lista = document.getElementById("lista-carrinho");
+    lista.innerHTML = "";
+    let total = 0;
+    carrinho.forEach((item, i) => {
+        total += item.preco;
+        const li = document.createElement("li");
+        li.innerHTML = `${item.nome} - R$ ${item.preco} <button onclick="removerItem(${i})">X</button>`;
+        lista.appendChild(li);
+    });
+    document.getElementById("total").textContent = total.toFixed(2);
 }
 
-function finalizarPedido() {
-  const mensagem = carrinho.map(p => `${p.nome} - R$${p.preco}`).join("\n");
-  const url = `https://wa.me/?text=${encodeURIComponent('Pedido:\n' + mensagem)}`;
-  window.open(url, '_blank');
+function removerItem(index) {
+    carrinho.splice(index, 1);
+    atualizarCarrinho();
+}
+
+function enviarPedido() {
+    if (carrinho.length === 0) return alert("Carrinho vazio!");
+    let texto = "Olá, quero fazer o seguinte pedido:%0A";
+    carrinho.forEach(item => {
+        texto += `- ${item.nome} R$${item.preco}%0A`;
+    });
+    texto += `Total: R$${document.getElementById("total").textContent}`;
+    window.open(`https://wa.me/SEUNUMERO?text=${texto}`, "_blank");
+}
+
+function filtrarCategoria(categoria) {
+    if (categoria === "tudo") {
+        renderizarProdutos(produtos);
+    } else {
+        const filtrado = produtos.filter(p => p.categoria === categoria);
+        renderizarProdutos(filtrado);
+    }
 }
 
 carregarProdutos();
