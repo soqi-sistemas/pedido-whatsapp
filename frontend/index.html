@@ -63,7 +63,7 @@
 
   <script>
     async function carregarProdutos() {
-      const res = await fetch('/painel-delivery/api/produtos.php');
+      const res = await fetch('/api/produtos.php');
       const produtos = await res.json();
       const container = document.getElementById('cardapio');
       const categorias = {};
