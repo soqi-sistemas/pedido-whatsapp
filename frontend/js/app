@@ -1,39 +1,43 @@
-const SUPABASE_URL = 'https://isauvpkojbjyxdaxefoz.supabase.co'
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYXV2cGtvamJqeXhkYXhlZm96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYyOTMzODIsImV4cCI6MjA2MTg2OTM4Mn0.MS54KRfmR_m7q5qDkoq48uuPkAAzlTFYVaBazXIyF1g'
-const menuContainer = document.getElementById('menu');
-const carrinho = [];
+let todosProdutos = [];
 
-async function carregarProdutos() {
-  const res = await fetch(\`\${SUPABASE_URL}/rest/v1/produtos?select=*\`, {
-    headers: {
-      apikey: SUPABASE_KEY,
-      Authorization: `Bearer \${SUPABASE_KEY}`
-    }
+function carregarProdutos() {
+  fetch('https://pedidosw.soqi.com.br/api/produtos.php')
+    .then(response => response.json())
+    .then(data => {
+      todosProdutos = data;
+      exibirProdutos(data);
+    })
+    .catch(error => {
+      console.error('Erro ao carregar produtos:', error);
+    });
+}
+
+function exibirProdutos(produtos) {
+  const container = document.getElementById('lista-produtos');
+  container.innerHTML = '';
+
+  produtos.forEach(produto => {
+    const card = document.createElement('div');
+    card.classList.add('produto-card');
+    card.innerHTML = `
+      <img src="${produto.imagem}" alt="${produto.nome}" />
+      <h3>${produto.nome}</h3>
+      <p>Preço: R$ ${produto.preco}</p>
+      <p>Sabor: ${produto.sabores ?? '-'}</p>
+      <p>Tamanhos: ${produto.tamanhos ?? '-'}</p>
+      <button onclick="adicionarAoCarrinho(${encodeURIComponent(JSON.stringify(produto))})">Adicionar</button>
+    `;
+    container.appendChild(card);
   });
-  const produtos = await res.json();
-  menuContainer.innerHTML = produtos.map(p => `
-    <div class="produto">
-      <h3>\${p.nome}</h3>
-      <p>R$ \${p.preco.toFixed(2)}</p>
-      <button onclick="adicionarCarrinho('\${p.nome}', \${p.preco})">Adicionar</button>
-    </div>
-  `).join('');
 }
 
-function adicionarCarrinho(nome, preco) {
-  carrinho.push({ nome, preco });
-  atualizarCarrinho();
+function filtrarProdutos(categoria) {
+  if (categoria === 'todos') {
+    exibirProdutos(todosProdutos);
+  } else {
+    const filtrados = todosProdutos.filter(p => p.categoria === categoria);
+    exibirProdutos(filtrados);
+  }
 }
-
-function atualizarCarrinho() {
-  const lista = document.getElementById('itens-carrinho');
-  lista.innerHTML = carrinho.map(item => `<li>\${item.nome} - R$ \${item.preco.toFixed(2)}</li>`).join('');
-}
-
-document.getElementById('enviar-whatsapp').addEventListener('click', () => {
-  const texto = carrinho.map(item => \`\${item.nome} - R$ \${item.preco.toFixed(2)}\`).join('%0A');
-  const link = \`https://wa.me/SEU_NUMERO?text=Pedido:%0A\${texto}\`;
-  window.open(link, '_blank');
-});
 
 carregarProdutos();
