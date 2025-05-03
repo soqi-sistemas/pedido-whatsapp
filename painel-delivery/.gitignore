@@ -1,0 +1,6 @@
+# Ignorar arquivos sensíveis ou temporários
+uploads/
+produtos.json
+*.log
+*.tmp
+.DS_Store
