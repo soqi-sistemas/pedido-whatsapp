@@ -4,96 +4,125 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cardápio</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .produto {
+      display: flex;
+      align-items: center;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      padding: 10px;
+      background: #fff;
+    }
+    .produto img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-right: 10px;
+    }
+    .btn-categoria {
+      margin: 5px 5px;
+    }
+    .banner {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      margin-bottom: 1rem;
+      border-radius: 12px;
+    }
+    .carrinho-item {
+      border-bottom: 1px solid #ccc;
+      padding: 0.5rem 0;
+    }
+    #carrinho {
+      margin-top: 2rem;
+    }
+  </style>
 </head>
 <body>
-  <header>
-    <h1>Cardápio</h1>
-    <div id="categorias"></div>
-  </header>
+  <div class="container py-3">
+    <img src="https://via.placeholder.com/600x150.png?text=Banner+Promocional" class="banner" alt="Banner">
 
-  <main>
-    <div id="produtos" class="produtos"></div>
-  </main>
+    <h2 class="mb-3">Cardápio</h2>
+    <div id="botoes-categorias" class="mb-3"></div>
+    <div id="produtos"></div>
 
-  <aside id="carrinho-container">
-    <h2>Carrinho</h2>
-    <ul id="carrinho"></ul>
-    <p>Total: R$ <span id="total">0.00</span></p>
-    <button onclick="enviarPedidoWhatsApp()">Enviar Pedido</button>
-  </aside>
+    <div id="carrinho">
+      <h4>Carrinho</h4>
+      <div id="itens-carrinho"></div>
+      <p><strong>Total:</strong> R$ <span id="total">0,00</span></p>
+      <a id="enviarWhats" class="btn btn-success" target="_blank">Enviar Pedido no WhatsApp</a>
+    </div>
+  </div>
 
   <script>
-    const API_URL = 'https://pedidosw.soqi.com.br/api/produtos.php';
-    let todosProdutos = [];
+    let produtos = [];
     let carrinho = [];
 
-    async function carregarProdutos() {
-      try {
-        const res = await fetch(API_URL);
-        if (!res.ok) throw new Error("Erro ao buscar produtos.");
-        todosProdutos = await res.json();
-        renderizarCategorias();
-        exibirProdutos(todosProdutos);
-      } catch (e) {
-        console.error(e);
-        document.getElementById('produtos').innerHTML = '<p>Erro ao carregar produtos.</p>';
-      }
+    function carregarProdutos() {
+      fetch('https://pedidosw.soqi.com.br/api/produtos.php')
+        .then(response => response.json())
+        .then(data => {
+          produtos = data;
+          renderizarCategorias();
+          renderizarProdutos(produtos);
+        });
     }
 
     function renderizarCategorias() {
-      const categorias = [...new Set(todosProdutos.map(p => p.categoria))];
-      const container = document.getElementById('categorias');
-      container.innerHTML = '<button onclick="exibirProdutos(todosProdutos)">Todos</button>' +
-        categorias.map(cat => `<button onclick="filtrarCategoria('${cat}')">${cat}</button>`).join('');
+      const categorias = [...new Set(produtos.map(p => p.categoria))];
+      const container = document.getElementById('botoes-categorias');
+      container.innerHTML = '';
+      categorias.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.textContent = cat;
+        btn.className = 'btn btn-outline-primary btn-sm btn-categoria';
+        btn.onclick = () => renderizarProdutos(produtos.filter(p => p.categoria === cat));
+        container.appendChild(btn);
+      });
     }
 
-    function filtrarCategoria(cat) {
-      const filtrados = todosProdutos.filter(p => p.categoria === cat);
-      exibirProdutos(filtrados);
-    }
-
-    function exibirProdutos(produtos) {
+    function renderizarProdutos(lista) {
       const container = document.getElementById('produtos');
-      container.innerHTML = produtos.map(p => `
-        <div class="produto">
+      container.innerHTML = '';
+      lista.forEach(p => {
+        const el = document.createElement('div');
+        el.className = 'produto';
+        el.innerHTML = `
           <img src="${p.imagem}" alt="${p.nome}" />
-          <h3>${p.nome}</h3>
-          <p>Sabor: ${p.sabores || '-'}</p>
-          <p>Preço: R$ ${p.preco}</p>
-          <button onclick='adicionarAoCarrinho(${JSON.stringify(p)})'>Adicionar</button>
-        </div>
-      `).join('');
+          <div>
+            <h5>${p.nome}</h5>
+            <p><strong>Preço:</strong> R$ ${p.preco.toFixed(2)}</p>
+            <p><strong>Sabor:</strong> ${p.sabores || '-'}</p>
+            <button class="btn btn-sm btn-primary" onclick='adicionarCarrinho(${JSON.stringify(p)})'>Adicionar</button>
+          </div>
+        `;
+        container.appendChild(el);
+      });
     }
 
-    function adicionarAoCarrinho(produto) {
+    function adicionarCarrinho(produto) {
       carrinho.push(produto);
       atualizarCarrinho();
     }
 
     function atualizarCarrinho() {
-      const lista = document.getElementById('carrinho');
-      lista.innerHTML = carrinho.map((item, i) => `
-        <li>
-          ${item.nome} - R$ ${item.preco} <button onclick="removerCarrinho(${i})">Remover</button>
-        </li>
-      `).join('');
-
-      const total = carrinho.reduce((acc, cur) => acc + Number(cur.preco), 0);
+      const container = document.getElementById('itens-carrinho');
+      container.innerHTML = '';
+      let total = 0;
+      carrinho.forEach(p => {
+        total += p.preco;
+        container.innerHTML += `<div class="carrinho-item">${p.nome} (${p.sabores}) - R$ ${p.preco.toFixed(2)}</div>`;
+      });
       document.getElementById('total').textContent = total.toFixed(2);
-    }
-
-    function removerCarrinho(index) {
-      carrinho.splice(index, 1);
-      atualizarCarrinho();
-    }
-
-    function enviarPedidoWhatsApp() {
-      if (carrinho.length === 0) return alert("Carrinho vazio");
-      let texto = carrinho.map(item => `- ${item.nome} (R$ ${item.preco})`).join('\n');
-      texto += `\nTotal: R$ ${carrinho.reduce((acc, cur) => acc + Number(cur.preco), 0).toFixed(2)}`;
-      const link = `https://wa.me/SEUNUMERO?text=${encodeURIComponent(texto)}`;
-      window.open(link, '_blank');
+      const texto = encodeURIComponent(carrinho.map(p => `- ${p.nome} (${p.sabores}) - R$ ${p.preco.toFixed(2)}`).join('\n') + `\nTotal: R$ ${total.toFixed(2)}`);
+      document.getElementById('enviarWhats').href = `https://wa.me/SEUNUMERO?text=${texto}`;
     }
 
     carregarProdutos();
