@@ -1,4 +1,5 @@
 let todosProdutos = [];
+let carrinho = [];
 
 function carregarProdutos() {
   fetch('https://pedidosw.soqi.com.br/api/produtos.php')
@@ -7,9 +8,7 @@ function carregarProdutos() {
       todosProdutos = data;
       exibirProdutos(data);
     })
-    .catch(error => {
-      console.error('Erro ao carregar produtos:', error);
-    });
+    .catch(error => console.error('Erro ao carregar produtos:', error));
 }
 
 function exibirProdutos(produtos) {
@@ -25,7 +24,7 @@ function exibirProdutos(produtos) {
       <p>Preço: R$ ${produto.preco}</p>
       <p>Sabor: ${produto.sabores ?? '-'}</p>
       <p>Tamanhos: ${produto.tamanhos ?? '-'}</p>
-      <button onclick="adicionarAoCarrinho(${encodeURIComponent(JSON.stringify(produto))})">Adicionar</button>
+      <button onclick='adicionarAoCarrinho(${JSON.stringify(JSON.stringify(produto))})'>Adicionar</button>
     `;
     container.appendChild(card);
   });
@@ -38,6 +37,29 @@ function filtrarProdutos(categoria) {
     const filtrados = todosProdutos.filter(p => p.categoria === categoria);
     exibirProdutos(filtrados);
   }
+}
+
+function adicionarAoCarrinho(produtoStr) {
+  const produto = JSON.parse(produtoStr);
+  carrinho.push(produto);
+  atualizarCarrinho();
+}
+
+function atualizarCarrinho() {
+  const lista = document.getElementById('itens-carrinho');
+  lista.innerHTML = '';
+
+  carrinho.forEach((item, index) => {
+    const li = document.createElement('li');
+    li.textContent = `${item.nome} - R$ ${item.preco}`;
+    lista.appendChild(li);
+  });
+}
+
+function finalizarPedido() {
+  const mensagem = carrinho.map(p => `${p.nome} - R$${p.preco}`).join("\n");
+  const url = `https://wa.me/?text=${encodeURIComponent('Pedido:\n' + mensagem)}`;
+  window.open(url, '_blank');
 }
 
 carregarProdutos();
