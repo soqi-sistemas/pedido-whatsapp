@@ -16,10 +16,55 @@
   <button onclick="filtrarProdutos('lanche')">Lanches</button>
   <button onclick="filtrarProdutos('porcao')">Porções</button>
   <button onclick="filtrarProdutos('refrigerante')">Refrigerantes</button>
+  
 </div>
   <main id="produtos" class="container"></main>
 
   <script>
+    let todosProdutos = [];
+
+function carregarProdutos() {
+  fetch('https://pedidosw.soqi.com.br/api/produtos.php')
+    .then(response => response.json())
+    .then(data => {
+      todosProdutos = data;
+      exibirProdutos(data);
+    })
+    .catch(error => {
+      console.error('Erro ao carregar produtos:', error);
+    });
+}
+
+function exibirProdutos(produtos) {
+  const container = document.getElementById('lista-produtos');
+  container.innerHTML = '';
+
+  produtos.forEach(produto => {
+    const card = document.createElement('div');
+    card.classList.add('produto-card');
+    card.innerHTML = `
+      <img src="${produto.imagem}" alt="${produto.nome}" />
+      <h3>${produto.nome}</h3>
+      <p>Preço: R$ ${produto.preco}</p>
+      <p>Sabor: ${produto.sabores ?? '-'}</p>
+      <p>Tamanhos: ${produto.tamanhos ?? '-'}</p>
+      <button onclick="adicionarAoCarrinho(${encodeURIComponent(JSON.stringify(produto))})">Adicionar</button>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function filtrarProdutos(categoria) {
+  if (categoria === 'todos') {
+    exibirProdutos(todosProdutos);
+  } else {
+    const filtrados = todosProdutos.filter(p => p.categoria === categoria);
+    exibirProdutos(filtrados);
+  }
+}
+
+carregarProdutos();
+
     async function carregarProdutos() {
       const resposta = await fetch("https://pedidosw.soqi.com.br/api/produtos.php");
       const produtos = await resposta.json();
