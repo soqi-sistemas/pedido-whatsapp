@@ -1,131 +1,152 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cardápio</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cardápio Online</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
-      background-color: #f8f9fa;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #fdfdfd;
+      font-family: 'Segoe UI', sans-serif;
     }
-    .produto {
-      display: flex;
-      align-items: center;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      margin-bottom: 1rem;
-      padding: 10px;
-      background: #fff;
+
+    .logo {
+      text-align: center;
+      padding: 20px 0;
     }
-    .produto img {
-      width: 100px;
-      height: 100px;
+
+    .logo img {
+      max-height: 80px;
+    }
+
+    .carousel-inner img {
+      max-height: 180px;
       object-fit: cover;
-      border-radius: 10px;
-      margin-right: 10px;
-    }
-    .btn-categoria {
-      margin: 5px 5px;
-    }
-    .banner {
       width: 100%;
-      height: 150px;
-      object-fit: cover;
-      margin-bottom: 1rem;
+    }
+
+    .produto {
+      border: 1px solid #eee;
       border-radius: 12px;
+      padding: 10px;
+      margin-bottom: 15px;
+      background: #fff;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.05);
     }
-    .carrinho-item {
-      border-bottom: 1px solid #ccc;
-      padding: 0.5rem 0;
+
+    .produto img {
+      max-width: 100%;
+      max-height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
     }
-    #carrinho {
-      margin-top: 2rem;
+
+    .preco {
+      font-weight: bold;
+      color: #d13b3b;
+    }
+
+    .categoria-btns {
+      margin: 20px 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .categoria-btns button {
+      border-radius: 20px;
     }
   </style>
 </head>
 <body>
-  <div class="container py-3">
-    <img src="https://via.placeholder.com/600x150.png?text=Banner+Promocional" class="banner" alt="Banner">
 
-    <h2 class="mb-3">Cardápio</h2>
-    <div id="botoes-categorias" class="mb-3"></div>
-    <div id="produtos"></div>
+  <!-- Logo -->
+  <div class="logo">
+    <img src="https://via.placeholder.com/150x80?text=LOGO" alt="Logo" />
+  </div>
 
-    <div id="carrinho">
-      <h4>Carrinho</h4>
-      <div id="itens-carrinho"></div>
-      <p><strong>Total:</strong> R$ <span id="total">0,00</span></p>
-      <a id="enviarWhats" class="btn btn-success" target="_blank">Enviar Pedido no WhatsApp</a>
+  <!-- Banner Rotativo -->
+  <div id="carouselBanner" class="carousel slide mb-4" data-bs-ride="carousel">
+    <div class="carousel-inner">
+      <div class="carousel-item active">
+        <img src="https://via.placeholder.com/600x180/ff6666/ffffff?text=Promoção+1" class="d-block w-100" alt="...">
+      </div>
+      <div class="carousel-item">
+        <img src="https://via.placeholder.com/600x180/66b3ff/ffffff?text=Promoção+2" class="d-block w-100" alt="...">
+      </div>
+      <div class="carousel-item">
+        <img src="https://via.placeholder.com/600x180/99cc33/ffffff?text=Promoção+3" class="d-block w-100" alt="...">
+      </div>
     </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselBanner" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselBanner" data-bs-slide="next">
+      <span class="carousel-control-next-icon"></span>
+    </button>
+  </div>
+
+  <!-- Botões de Categoria -->
+  <div class="container">
+    <div class="categoria-btns text-center">
+      <button class="btn btn-outline-danger" onclick="filtrarProdutos('pizza')">Pizzas</button>
+      <button class="btn btn-outline-warning" onclick="filtrarProdutos('lanche')">Lanches</button>
+      <button class="btn btn-outline-primary" onclick="filtrarProdutos('porcao')">Porções</button>
+      <button class="btn btn-outline-success" onclick="filtrarProdutos('refrigerante')">Refrigerantes</button>
+      <button class="btn btn-secondary" onclick="filtrarProdutos('todos')">Todos</button>
+    </div>
+
+    <!-- Lista de Produtos -->
+    <div id="produtos" class="row"></div>
   </div>
 
   <script>
-    let produtos = [];
-    let carrinho = [];
+    let todosProdutos = [];
 
-    function carregarProdutos() {
-      fetch('https://pedidosw.soqi.com.br/api/produtos.php')
-        .then(response => response.json())
-        .then(data => {
-          produtos = data;
-          renderizarCategorias();
-          renderizarProdutos(produtos);
-        });
+    async function carregarProdutos() {
+      try {
+        const response = await fetch("https://pedidosw.soqi.com.br/api/produtos.php");
+        const produtos = await response.json();
+        todosProdutos = produtos;
+        exibirProdutos(produtos);
+      } catch (error) {
+        console.error("Erro ao carregar produtos:", error);
+      }
     }
 
-    function renderizarCategorias() {
-      const categorias = [...new Set(produtos.map(p => p.categoria))];
-      const container = document.getElementById('botoes-categorias');
-      container.innerHTML = '';
-      categorias.forEach(cat => {
-        const btn = document.createElement('button');
-        btn.textContent = cat;
-        btn.className = 'btn btn-outline-primary btn-sm btn-categoria';
-        btn.onclick = () => renderizarProdutos(produtos.filter(p => p.categoria === cat));
-        container.appendChild(btn);
+    function exibirProdutos(produtos) {
+      const container = document.getElementById("produtos");
+      container.innerHTML = "";
+
+      produtos.forEach(p => {
+        const precoFinal = p.precos ? p.precos : p.preco;
+        container.innerHTML += `
+          <div class="col-12 col-md-6 col-lg-4">
+            <div class="produto">
+              <img src="${p.imagem}" alt="${p.nome}" class="w-100 mb-2" />
+              <h5>${p.nome}</h5>
+              <p class="mb-1">${p.sabores ? `<strong>Sabores:</strong> ${p.sabores}` : ''}</p>
+              <p class="mb-1">${p.tamanhos ? `<strong>Tamanhos:</strong> ${p.tamanhos}` : ''}</p>
+              <p class="preco">R$ ${parseFloat(precoFinal).toFixed(2)}</p>
+            </div>
+          </div>`;
       });
     }
 
-    function renderizarProdutos(lista) {
-      const container = document.getElementById('produtos');
-      container.innerHTML = '';
-      lista.forEach(p => {
-        const el = document.createElement('div');
-        el.className = 'produto';
-        el.innerHTML = `
-          <img src="${p.imagem}" alt="${p.nome}" />
-          <div>
-            <h5>${p.nome}</h5>
-            <p><strong>Preço:</strong> R$ ${p.preco.toFixed(2)}</p>
-            <p><strong>Sabor:</strong> ${p.sabores || '-'}</p>
-            <button class="btn btn-sm btn-primary" onclick='adicionarCarrinho(${JSON.stringify(p)})'>Adicionar</button>
-          </div>
-        `;
-        container.appendChild(el);
-      });
-    }
-
-    function adicionarCarrinho(produto) {
-      carrinho.push(produto);
-      atualizarCarrinho();
-    }
-
-    function atualizarCarrinho() {
-      const container = document.getElementById('itens-carrinho');
-      container.innerHTML = '';
-      let total = 0;
-      carrinho.forEach(p => {
-        total += p.preco;
-        container.innerHTML += `<div class="carrinho-item">${p.nome} (${p.sabores}) - R$ ${p.preco.toFixed(2)}</div>`;
-      });
-      document.getElementById('total').textContent = total.toFixed(2);
-      const texto = encodeURIComponent(carrinho.map(p => `- ${p.nome} (${p.sabores}) - R$ ${p.preco.toFixed(2)}`).join('\n') + `\nTotal: R$ ${total.toFixed(2)}`);
-      document.getElementById('enviarWhats').href = `https://wa.me/SEUNUMERO?text=${texto}`;
+    function filtrarProdutos(categoria) {
+      if (categoria === "todos") {
+        exibirProdutos(todosProdutos);
+      } else {
+        const filtrados = todosProdutos.filter(p => p.categoria === categoria);
+        exibirProdutos(filtrados);
+      }
     }
 
     carregarProdutos();
   </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
