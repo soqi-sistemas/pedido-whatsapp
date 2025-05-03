@@ -1,0 +1,22 @@
+body {
+  font-family: sans-serif;
+  background: #f8f8f8;
+  margin: 0;
+  padding: 0;
+}
+.logo {
+  max-width: 120px;
+}
+header {
+  text-align: center;
+  padding: 1rem;
+  background: #222;
+  color: #fff;
+}
+#carrinho {
+  padding: 1rem;
+  background: #fff;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+}
