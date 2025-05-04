@@ -169,18 +169,20 @@
     });
   }
 
-  function adicionarCarrinho(id) {
-    const item = produtos.find(p => p.id === id);
-    const existente = carrinho.find(p => p.id === id);
+function adicionarCarrinho(id) {
+  const item = produtos.find(p => p.id === id);
+  const existente = carrinho.find(p => p.id === id);
 
-    if (existente) {
-      existente.qtd += 1;
-    } else {
-      carrinho.push({...item, qtd: 1});
-    }
+  const observacao = prompt("Alguma observação para esse item? (opcional)");
 
-    atualizarCarrinho();
+  if (existente && existente.observacao === observacao) {
+    existente.qtd += 1;
+  } else {
+    carrinho.push({...item, qtd: 1, observacao: observacao || ""});
   }
+
+  atualizarCarrinho();
+}
 
   function atualizarCarrinho() {
     document.getElementById("carrinho-count").innerText = carrinho.reduce((acc, i) => acc + i.qtd, 0);
@@ -200,13 +202,14 @@
       const li = document.createElement("li");
       li.className = "list-group-item";
       li.innerHTML = `
-        <strong>${item.nome}</strong> (${item.qtd}x R$ ${item.preco}) = R$ ${(item.qtd * item.preco).toFixed(2)}
-        <div class="float-end">
-          <button class="btn btn-sm btn-danger" onclick="removerItem(${i})">X</button>
-          <button class="btn btn-sm btn-secondary mx-1" onclick="diminuirQtd(${i})">-</button>
-          <button class="btn btn-sm btn-secondary" onclick="aumentarQtd(${i})">+</button>
-        </div>
-      `;
+  <strong>${item.nome}</strong> (${item.qtd}x R$ ${item.preco}) = R$ ${(item.qtd * item.preco).toFixed(2)}
+  ${item.observacao ? `<br><small><em>Obs: ${item.observacao}</em></small>` : ""}
+  <div class="float-end mt-1">
+    <button class="btn btn-sm btn-danger" onclick="removerItem(${i})">X</button>
+    <button class="btn btn-sm btn-secondary mx-1" onclick="diminuirQtd(${i})">-</button>
+    <button class="btn btn-sm btn-secondary" onclick="aumentarQtd(${i})">+</button>
+  </div>
+`;
       lista.appendChild(li);
     });
 
@@ -250,13 +253,11 @@
 
     let texto = `Pedido de ${nome}\n\n`;
     carrinho.forEach(i => {
-      texto += `${i.qtd}x ${i.nome} - R$ ${(i.preco * i.qtd).toFixed(2)}\n`;
-    });
-
+    texto += `${i.qtd}x ${i.nome} - R$ ${(i.preco * i.qtd).toFixed(2)}\n`;
     texto += `\nTotal: R$ ${carrinho.reduce((a, b) => a + b.qtd * b.preco, 0).toFixed(2)}`;
     texto += `\n\nEndereço:\n${rua}\n${bairro} - ${cidade}`;
     texto += `\nPagamento: ${pagamento}`;
-
+    });
     const url = "https://wa.me/+5545998059298?text=" + encodeURIComponent(texto);
     window.open(url, "_blank");
   }
