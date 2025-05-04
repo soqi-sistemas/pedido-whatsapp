@@ -3,307 +3,243 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sistema de Pedidos</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
+  <title>Pedido WhatsApp</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <style>
     body {
       background: #212121;
       color: #fff;
-      font-family: Arial, sans-serif;
+      padding-top: 20px;
     }
-    .banner img {
+    .logo {
+      width: 120px;
+      display: block;
+      margin: 0 auto 20px auto;
+    }
+    .carousel-inner img {
       width: 100%;
       max-height: 200px;
       object-fit: cover;
       border-radius: 10px;
     }
-    .logo {
-      text-align: center;
-      margin: 10px 0 0 0;
-    }
-    .logo img {
-      max-height: 80px;
-    }
-    .categorias-scroll {
-  border-bottom: 1px solid #444;
-}
-.categoria-btn {
-  display: inline-block;
-  margin: 5px 10px;
-  padding: 10px 20px;
-  background: #444;
-  color: #fff;
-  border: none;
-  border-radius: 25px;
-  font-weight: bold;
-  transition: all 0.3s;
-}
-.categoria-btn:hover,
-.categoria-btn.active {
-  background: #ffc107;
-  color: #000;
-}
-    .card-produto {
-      background: #2e2e2e;
-      border: none;
+    .product {
+      background: #2a2a2a;
+      padding: 15px;
       border-radius: 10px;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
+      text-align: center;
     }
-    .card-produto img {
+    .product img {
+      max-width: 100%;
       max-height: 150px;
-      object-fit: cover;
-      border-radius: 10px 10px 0 0;
+      border-radius: 10px;
+      margin-bottom: 10px;
     }
-    #carrinho-btn {
+    .cart-btn {
       position: fixed;
       bottom: 20px;
       right: 20px;
-      z-index: 999;
+      z-index: 9999;
     }
-    .badge {
-      background-color: red;
-      font-size: 0.8rem;
+    .cart-count {
+      background: red;
+      border-radius: 50%;
+      padding: 2px 7px;
+      font-size: 12px;
       position: absolute;
-      top: -5px;
-      right: -5px;
+      top: -10px;
+      right: -10px;
     }
-    .modal-content {
-      background: #2e2e2e;
-      color: white;
+    .cart-item {
+      border-bottom: 1px solid #444;
+      padding: 10px 0;
     }
-    .form-input {
-      padding: 0.5rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      width: 100%;
-      background: #fff;
-      color: #000;
-    }
-    .form-input.error {
-      border-color: red;
-      background-color: #ffe5e5;
+    .btn-sm {
+      padding: 2px 8px;
+      font-size: 0.8rem;
     }
   </style>
 </head>
 <body>
 
-  <div class="logo">
-    <img src="https://pedidosw.soqi.com.br/img/logo.png?text=LOGO" alt="Logo">
-  </div>
+  <!-- LOGO -->
+  <img src="https://pedidosw.soqi.com.br/img/logo.png" class="logo" alt="Logo"/>
 
-  <div class="container mt-2">
-    <div id="carouselBanner" class="carousel slide banner" data-bs-ride="carousel">
-      <div class="carousel-inner">
-        <div class="carousel-item active">
-          <img src="https://pedidosw.soqi.com.br/img/1.png?text=Banner+1" class="d-block w-100" alt="Banner 1">
-        </div>
-        <div class="carousel-item">
-          <img src="https://pedidosw.soqi.com.br/img/2.png?text=Banner+2" class="d-block w-100" alt="Banner 2">
-        </div>
+  <!-- BANNER ROTATIVO -->
+  <div id="bannerCarousel" class="carousel slide container" data-bs-ride="carousel">
+    <div class="carousel-inner">
+      <div class="carousel-item active">
+        <img src="https://pedidosw.soqi.com.br/img/2.png?text=Banner+1" class="d-block w-100">
+      </div>
+      <div class="carousel-item">
+        <img src="https://pedidosw.soqi.com.br/img/1.png?text=Banner+2" class="d-block w-100">
       </div>
     </div>
-
-    <div class="categorias-scroll text-center py-2 bg-dark sticky-top shadow-sm" style="overflow-x: auto; white-space: nowrap;" id="botoes-categorias"></div>
-
-    <div class="row" id="produtos"></div>
   </div>
 
-  <button id="carrinho-btn" class="btn btn-success position-relative" data-bs-toggle="modal" data-bs-target="#carrinhoModal">
-    🛒 Carrinho <span class="badge" id="contador-carrinho">0</span>
+  <!-- MENU CATEGORIA -->
+  <div class="container mt-3 text-center">
+    <div class="btn-group flex-wrap">
+      <button class="btn btn-warning m-1" onclick="filtrarCategoria('Todas')">Todas</button>
+      <button class="btn btn-warning m-1" onclick="filtrarCategoria('Pizzas')">Pizzas</button>
+      <button class="btn btn-warning m-1" onclick="filtrarCategoria('Lanches')">Lanches</button>
+      <button class="btn btn-warning m-1" onclick="filtrarCategoria('Porções')">Porções</button>
+      <button class="btn btn-warning m-1" onclick="filtrarCategoria('Refrigerantes')">Refrigerantes</button>
+    </div>
+  </div>
+
+  <!-- PRODUTOS -->
+  <div class="container mt-4">
+    <div id="produtos" class="row"></div>
+  </div>
+
+  <!-- BOTÃO CARRINHO -->
+  <button class="btn btn-warning cart-btn" onclick="mostrarCarrinho()">
+    🛒 Carrinho <span class="cart-count" id="contador-carrinho">0</span>
   </button>
 
-  <!-- Modal Carrinho -->
-  <div class="modal fade" id="carrinhoModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content p-4">
-        <h4 class="modal-title mb-3">Seu Carrinho</h4>
-        <div id="itens-carrinho"></div>
-
-        <div id="formulario-cliente" class="mt-4">
-          <h5 class="mb-2">Dados do Cliente</h5>
-          <div class="row g-2">
-            <div class="col-md-6"><input type="text" id="nome" placeholder="Nome completo" class="form-input" required></div>
-            <div class="col-md-6"><input type="text" id="rua" placeholder="Rua" class="form-input" required></div>
-            <div class="col-md-3"><input type="text" id="numero" placeholder="Número" class="form-input" required></div>
-            <div class="col-md-3"><input type="text" id="bairro" placeholder="Bairro" class="form-input" required></div>
-            <div class="col-md-6"><input type="text" id="cidade" placeholder="Cidade" class="form-input" required></div>
-            <div class="col-md-6">
-              <select id="pagamento" class="form-input" required>
-                <option value="">Forma de pagamento</option>
-                <option value="PIX">PIX</option>
-                <option value="Cartão">Cartão</option>
-                <option value="Dinheiro">Dinheiro</option>
-              </select>
-            </div>
-          </div>
+  <!-- MODAL CARRINHO -->
+  <div class="modal fade" id="modalCarrinho" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-header">
+          <h5 class="modal-title">Carrinho</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
-
-        <div class="mt-4 d-flex justify-content-between">
-          <strong>Total: <span id="total">R$ 0,00</span></strong>
-          <button id="botao-enviar" class="btn btn-primary">Enviar pelo WhatsApp</button>
+        <div class="modal-body" id="itens-carrinho"></div>
+        <div class="modal-body">
+          <input type="text" class="form-control mb-2" id="nomeCliente" placeholder="Seu nome">
+          <input type="text" class="form-control mb-2" id="endereco" placeholder="Rua, Número, Bairro, Cidade">
+          <select id="pagamento" class="form-control mb-2">
+            <option disabled selected>Forma de pagamento</option>
+            <option>PIX</option>
+            <option>Cartão</option>
+            <option>Dinheiro</option>
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button onclick="enviarPedido()" class="btn btn-success">Enviar via WhatsApp</button>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- SCRIPTS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    const apiUrl = 'https://pedidosw.soqi.com.br/api/produtos.php';
-    const produtosEl = document.getElementById('produtos');
-    const categoriasEl = document.getElementById('botoes-categorias');
-    const carrinho = [];
-    let categorias = [];
+    let todosProdutos = [];
+    let carrinho = [];
 
-    function atualizarContadorCarrinho() {
-      document.getElementById('contador-carrinho').textContent = carrinho.reduce((a, i) => a + i.qtd, 0);
+    async function carregarProdutos() {
+      try {
+        const res = await fetch("https://pedidosw.soqi.com.br/api/produtos.php");
+        todosProdutos = await res.json();
+        exibirProdutos("Todas");
+      } catch (err) {
+        alert("Erro ao carregar produtos.");
+      }
     }
 
-    function renderizarCarrinho() {
-      const container = document.getElementById('itens-carrinho');
-      container.innerHTML = '';
-      let total = 0;
+    function filtrarCategoria(categoria) {
+      exibirProdutos(categoria);
+    }
 
-      carrinho.forEach((item, index) => {
-        const subtotal = item.preco * item.qtd;
-        total += subtotal;
-        container.innerHTML += `
-          <div class="d-flex justify-content-between align-items-center my-2">
-            <span>${item.nome} (${item.qtd}x) - R$ ${subtotal.toFixed(2)}</span>
-            <div>
-              <button class="btn btn-sm btn-danger me-1" onclick="removerItem(${index})">-</button>
-              <button class="btn btn-sm btn-success" onclick="aumentarItem(${index})">+</button>
-            </div>
+    function exibirProdutos(categoria) {
+      const container = document.getElementById("produtos");
+      container.innerHTML = "";
+
+      const filtrados = categoria === "Todas"
+        ? todosProdutos
+        : todosProdutos.filter(p => p.categoria === categoria);
+
+      filtrados.forEach(prod => {
+        const col = document.createElement("div");
+        col.className = "col-12 col-md-4";
+        col.innerHTML = `
+          <div class="product">
+            <img src="${prod.imagem}" alt="${prod.nome}">
+            <h5>${prod.nome}</h5>
+            <p><strong>R$ ${prod.preco.toFixed(2)}</strong></p>
+            <button class="btn btn-outline-light btn-sm" onclick='adicionarCarrinho(${JSON.stringify(prod)})'>Adicionar ao pedido</button>
           </div>`;
+        container.appendChild(col);
       });
-
-      document.getElementById('total').innerText = 'R$ ' + total.toFixed(2);
-      atualizarContadorCarrinho();
     }
 
-    function removerItem(index) {
-      if (carrinho[index].qtd > 1) {
-        carrinho[index].qtd--;
+    function adicionarCarrinho(produto) {
+      const item = carrinho.find(p => p.id === produto.id);
+      if (item) {
+        item.qtd++;
       } else {
-        carrinho.splice(index, 1);
+        carrinho.push({ ...produto, qtd: 1, obs: "" });
       }
-      renderizarCarrinho();
+      atualizarCarrinho();
     }
 
-    function aumentarItem(index) {
-      carrinho[index].qtd++;
-      renderizarCarrinho();
+    function removerItem(id) {
+      carrinho = carrinho.filter(p => p.id !== id);
+      atualizarCarrinho();
     }
 
-    function adicionarAoCarrinho(produto) {
-      const existente = carrinho.find(p => p.id === produto.id);
-      if (existente) {
-        existente.qtd++;
-      } else {
-        carrinho.push({ ...produto, qtd: 1 });
-      }
-      renderizarCarrinho();
+    function mudarQtd(id, delta) {
+      const item = carrinho.find(p => p.id === id);
+      if (!item) return;
+      item.qtd += delta;
+      if (item.qtd <= 0) removerItem(id);
+      atualizarCarrinho();
     }
 
-    function filtrarPorCategoria(cat) {
-  document.querySelectorAll('.categoria-btn').forEach(btn => btn.classList.remove('active'));
-  if (cat === '') {
-    document.getElementById('cat-todos').classList.add('active');
-  } else {
-    const btn = document.getElementById(`cat-${cat}`);
-    if (btn) btn.classList.add('active');
-  }
-  carregarProdutos(cat);
-}
-
-    function carregarProdutos(filtro = '') {
-      fetch(apiUrl)
-        .then(res => res.json())
-        .then(data => {
-          produtosEl.innerHTML = '';
-          categorias = [...new Set(data.map(p => p.categoria))];
-          if (!filtro) gerarBotoesCategorias();
-
-          const produtosFiltrados = filtro ? data.filter(p => p.categoria === filtro) : data;
-
-          produtosFiltrados.forEach(p => {
-            produtosEl.innerHTML += `
-              <div class="col-md-4">
-                <div class="card card-produto">
-                  <img src="${p.imagem}" class="card-img-top">
-                  <div class="card-body">
-                    <h5 class="card-title">${p.nome}</h5>
-                    <p>${p.sabores || ''}</p>
-                    <strong>R$ ${p.preco.toFixed(2)}</strong>
-                    <button class="btn btn-success mt-2 w-100" onclick='adicionarAoCarrinho(${JSON.stringify(p)})'>Adicionar</button>
-                  </div>
-                </div>
-              </div>`;
-          });
-        });
-    }
-
-    function gerarBotoesCategorias() {
-  categoriasEl.innerHTML = '';
-  categorias.forEach(cat => {
-    const btn = document.createElement('button');
-    btn.className = 'categoria-btn';
-    btn.id = `cat-${cat}`;
-    btn.textContent = cat;
-    btn.onclick = () => filtrarPorCategoria(cat);
-    categoriasEl.appendChild(btn);
-  });
-      // Adiciona botão "Todos"
-  const btnTodos = document.createElement('button');
-  btnTodos.className = 'categoria-btn active';
-  btnTodos.id = 'cat-todos';
-  btnTodos.textContent = 'Todos';
-  btnTodos.onclick = () => filtrarPorCategoria('');
-  categoriasEl.prepend(btnTodos);
-}
-    function validarFormulario() {
-      const campos = ['nome', 'rua', 'numero', 'bairro', 'cidade', 'pagamento'];
-      let valido = true;
-      campos.forEach(id => {
-        const campo = document.getElementById(id);
-        campo.classList.remove('error');
-        if (!campo.value.trim()) {
-          campo.classList.add('error');
-          valido = false;
-        } else if (id === 'numero' && isNaN(campo.value)) {
-          campo.classList.add('error');
-          valido = false;
-        } else if (id === 'nome' && /\d/.test(campo.value)) {
-          campo.classList.add('error');
-          valido = false;
-        }
-      });
-      if (!valido) alert('Por favor, preencha todos os campos corretamente.');
-      return valido;
-    }
-
-    document.getElementById("botao-enviar").addEventListener("click", function () {
-      if (!validarFormulario()) return;
-
-      const nome = document.getElementById("nome").value;
-      const rua = document.getElementById("rua").value;
-      const numero = document.getElementById("numero").value;
-      const bairro = document.getElementById("bairro").value;
-      const cidade = document.getElementById("cidade").value;
-      const pagamento = document.getElementById("pagamento").value;
-
-      let texto = `*Pedido de ${nome}*%0AEndereço: ${rua}, ${numero}, ${bairro}, ${cidade}%0AForma de Pagamento: ${pagamento}%0A%0AItens:%0A`;
-
+    function atualizarCarrinho() {
+      const div = document.getElementById("itens-carrinho");
+      div.innerHTML = "";
       carrinho.forEach(p => {
-        texto += `- ${p.qtd}x ${p.nome} (R$ ${(p.preco * p.qtd).toFixed(2)})%0A`;
+        const el = document.createElement("div");
+        el.className = "cart-item";
+        el.innerHTML = `
+          <div><strong>${p.nome}</strong></div>
+          <div>Qtd: ${p.qtd}
+            <button onclick="mudarQtd('${p.id}', 1)" class="btn btn-success btn-sm">+</button>
+            <button onclick="mudarQtd('${p.id}', -1)" class="btn btn-danger btn-sm">–</button>
+            <button onclick="removerItem('${p.id}')" class="btn btn-outline-light btn-sm">X</button>
+          </div>
+          <input type="text" class="form-control mt-1" placeholder="Observações" value="${p.obs}" 
+            onchange="carrinho.find(x => x.id === '${p.id}').obs = this.value">
+        `;
+        div.appendChild(el);
       });
 
-      texto += `%0ATotal: R$ ${carrinho.reduce((a, i) => a + i.qtd * i.preco, 0).toFixed(2)}`;
+      document.getElementById("contador-carrinho").innerText = carrinho.reduce((t, i) => t + i.qtd, 0);
+    }
 
-      window.open(`https://wa.me/+5545998059298?text=${texto}`, '_blank');
-    });
+    function mostrarCarrinho() {
+      atualizarCarrinho();
+      const modalEl = document.getElementById("modalCarrinho");
+      const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+      modal.show();
+    }
+
+    function enviarPedido() {
+      const nome = document.getElementById("nomeCliente").value.trim();
+      const end = document.getElementById("endereco").value.trim();
+      const pag = document.getElementById("pagamento").value;
+
+      if (!nome || !end || !pag) {
+        alert("Preencha todos os campos!");
+        return;
+      }
+
+      let msg = `Pedido de ${nome}%0AEndereço: ${end}%0APagamento: ${pag}%0A-----------------%0A`;
+      carrinho.forEach(p => {
+        msg += `${p.qtd}x ${p.nome} - R$${(p.preco * p.qtd).toFixed(2)}%0AObs: ${p.obs || "-"}%0A`;
+      });
+
+      const total = carrinho.reduce((t, p) => t + p.qtd * p.preco, 0);
+      msg += `-----------------%0ATotal: R$ ${total.toFixed(2)}`;
+
+      window.open(`https://wa.me/+5545998059298?text=${msg}`, "_blank");
+    }
 
     carregarProdutos();
   </script>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
