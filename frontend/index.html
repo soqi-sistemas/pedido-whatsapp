@@ -24,10 +24,25 @@
     .logo img {
       max-height: 80px;
     }
-    .categoria-btn {
-      margin: 5px;
-      border-radius: 20px;
-    }
+    .categorias-scroll {
+  border-bottom: 1px solid #444;
+}
+.categoria-btn {
+  display: inline-block;
+  margin: 5px 10px;
+  padding: 10px 20px;
+  background: #444;
+  color: #fff;
+  border: none;
+  border-radius: 25px;
+  font-weight: bold;
+  transition: all 0.3s;
+}
+.categoria-btn:hover,
+.categoria-btn.active {
+  background: #ffc107;
+  color: #000;
+}
     .card-produto {
       background: #2e2e2e;
       border: none;
@@ -88,7 +103,7 @@
       </div>
     </div>
 
-    <div class="text-center my-3" id="botoes-categorias"></div>
+    <div class="categorias-scroll text-center py-2 bg-dark sticky-top shadow-sm" style="overflow-x: auto; white-space: nowrap;" id="botoes-categorias"></div>
 
     <div class="row" id="produtos"></div>
   </div>
@@ -189,10 +204,15 @@
     }
 
     function filtrarPorCategoria(cat) {
-      document.querySelectorAll('.categoria-btn').forEach(btn => btn.classList.remove('btn-warning'));
-      document.getElementById(`cat-${cat}`).classList.add('btn-warning');
-      carregarProdutos(cat);
-    }
+  document.querySelectorAll('.categoria-btn').forEach(btn => btn.classList.remove('active'));
+  if (cat === '') {
+    document.getElementById('cat-todos').classList.add('active');
+  } else {
+    const btn = document.getElementById(`cat-${cat}`);
+    if (btn) btn.classList.add('active');
+  }
+  carregarProdutos(cat);
+}
 
     function carregarProdutos(filtro = '') {
       fetch(apiUrl)
@@ -222,12 +242,23 @@
     }
 
     function gerarBotoesCategorias() {
-      categoriasEl.innerHTML = '';
-      categorias.forEach(cat => {
-        categoriasEl.innerHTML += `<button id="cat-${cat}" class="btn btn-outline-light categoria-btn" onclick="filtrarPorCategoria('${cat}')">${cat}</button>`;
-      });
-    }
-
+  categoriasEl.innerHTML = '';
+  categorias.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'categoria-btn';
+    btn.id = `cat-${cat}`;
+    btn.textContent = cat;
+    btn.onclick = () => filtrarPorCategoria(cat);
+    categoriasEl.appendChild(btn);
+  });
+      // Adiciona botão "Todos"
+  const btnTodos = document.createElement('button');
+  btnTodos.className = 'categoria-btn active';
+  btnTodos.id = 'cat-todos';
+  btnTodos.textContent = 'Todos';
+  btnTodos.onclick = () => filtrarPorCategoria('');
+  categoriasEl.prepend(btnTodos);
+}
     function validarFormulario() {
       const campos = ['nome', 'rua', 'numero', 'bairro', 'cidade', 'pagamento'];
       let valido = true;
