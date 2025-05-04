@@ -126,26 +126,40 @@
   <!-- SCRIPTS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    let carrinho = [];
+     let todosProdutos = [];
 
-    async function carregarProdutos() {
-      const res = await fetch("https://pedidosw.soqi.com.br/api/produtos.php");
-      const produtos = await res.json();
-      const container = document.getElementById("produtos");
+  async function carregarProdutos() {
+    const res = await fetch("https://pedidosw.soqi.com.br/api/produtos.php");
+    const produtos = await res.json();
+    todosProdutos = produtos;
+    exibirProdutos("Todas");
+  }
 
-      produtos.forEach(prod => {
-        const col = document.createElement("div");
-        col.className = "col-12 col-md-4";
-        col.innerHTML = `
-          <div class="product">
-            <img src="${prod.imagem}" alt="${prod.nome}">
-            <h5>${prod.nome}</h5>
-            <p><strong>R$ ${prod.preco.toFixed(2)}</strong></p>
-            <button class="btn btn-outline-light btn-sm" onclick='adicionarCarrinho(${JSON.stringify(prod)})'>Adicionar ao pedido</button>
-          </div>`;
-        container.appendChild(col);
-      });
-    }
+  function filtrarCategoria(categoria) {
+    exibirProdutos(categoria);
+  }
+
+  function exibirProdutos(categoria) {
+    const container = document.getElementById("produtos");
+    container.innerHTML = "";
+
+    const filtrados = categoria === "Todas"
+      ? todosProdutos
+      : todosProdutos.filter(p => p.categoria === categoria);
+
+    filtrados.forEach(prod => {
+      const col = document.createElement("div");
+      col.className = "col-12 col-md-4";
+      col.innerHTML = `
+        <div class="product">
+          <img src="${prod.imagem}" alt="${prod.nome}">
+          <h5>${prod.nome}</h5>
+          <p><strong>R$ ${prod.preco.toFixed(2)}</strong></p>
+          <button class="btn btn-outline-light btn-sm" onclick='adicionarCarrinho(${JSON.stringify(prod)})'>Adicionar ao pedido</button>
+        </div>`;
+      container.appendChild(col);
+    });
+  }
 
     function adicionarCarrinho(produto) {
       const item = carrinho.find(p => p.id === produto.id);
