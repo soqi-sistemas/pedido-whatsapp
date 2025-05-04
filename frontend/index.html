@@ -9,12 +9,12 @@
     body {
       background: #212121;
       color: #fff;
-      padding-top: 150px;
+      padding-top: 20px;
     }
     .logo {
       width: 120px;
-      margin: 20px auto;
       display: block;
+      margin: 0 auto 20px auto;
     }
     .carousel-inner img {
       width: 100%;
@@ -76,16 +76,17 @@
       </div>
     </div>
   </div>
-<!-- MENU CATEGORIA-->
-<div class="container mt-3 text-center">
-  <div class="btn-group flex-wrap">
-    <button class="btn btn-outline-warning m-1" onclick="filtrarCategoria('Todas')">Todas</button>
-    <button class="btn btn-outline-warning m-1" onclick="filtrarCategoria('Pizzas')">Pizzas</button>
-    <button class="btn btn-outline-warning m-1" onclick="filtrarCategoria('Lanches')">Lanches</button>
-    <button class="btn btn-outline-warning m-1" onclick="filtrarCategoria('Porções')">Porções</button>
-    <button class="btn btn-outline-warning m-1" onclick="filtrarCategoria('Refrigerantes')">Refrigerantes</button>
+
+  <!-- MENU CATEGORIA -->
+  <div class="container mt-3 text-center">
+    <div class="btn-group flex-wrap">
+      <button class="btn btn-warning m-1" onclick="filtrarCategoria('Todas')">Todas</button>
+      <button class="btn btn-warning m-1" onclick="filtrarCategoria('Pizzas')">Pizzas</button>
+      <button class="btn btn-warning m-1" onclick="filtrarCategoria('Lanches')">Lanches</button>
+      <button class="btn btn-warning m-1" onclick="filtrarCategoria('Porções')">Porções</button>
+      <button class="btn btn-warning m-1" onclick="filtrarCategoria('Refrigerantes')">Refrigerantes</button>
+    </div>
   </div>
-</div>
 
   <!-- PRODUTOS -->
   <div class="container mt-4">
@@ -126,40 +127,44 @@
   <!-- SCRIPTS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-     let todosProdutos = [];
+    let todosProdutos = [];
+    let carrinho = [];
 
-  async function carregarProdutos() {
-    const res = await fetch("https://pedidosw.soqi.com.br/api/produtos.php");
-    const produtos = await res.json();
-    todosProdutos = produtos;
-    exibirProdutos("Todas");
-  }
+    async function carregarProdutos() {
+      try {
+        const res = await fetch("https://pedidosw.soqi.com.br/api/produtos.php");
+        todosProdutos = await res.json();
+        exibirProdutos("Todas");
+      } catch (err) {
+        alert("Erro ao carregar produtos.");
+      }
+    }
 
-  function filtrarCategoria(categoria) {
-    exibirProdutos(categoria);
-  }
+    function filtrarCategoria(categoria) {
+      exibirProdutos(categoria);
+    }
 
-  function exibirProdutos(categoria) {
-    const container = document.getElementById("produtos");
-    container.innerHTML = "";
+    function exibirProdutos(categoria) {
+      const container = document.getElementById("produtos");
+      container.innerHTML = "";
 
-    const filtrados = categoria === "Todas"
-      ? todosProdutos
-      : todosProdutos.filter(p => p.categoria === categoria);
+      const filtrados = categoria === "Todas"
+        ? todosProdutos
+        : todosProdutos.filter(p => p.categoria === categoria);
 
-    filtrados.forEach(prod => {
-      const col = document.createElement("div");
-      col.className = "col-12 col-md-4";
-      col.innerHTML = `
-        <div class="product">
-          <img src="${prod.imagem}" alt="${prod.nome}">
-          <h5>${prod.nome}</h5>
-          <p><strong>R$ ${prod.preco.toFixed(2)}</strong></p>
-          <button class="btn btn-outline-light btn-sm" onclick='adicionarCarrinho(${JSON.stringify(prod)})'>Adicionar ao pedido</button>
-        </div>`;
-      container.appendChild(col);
-    });
-  }
+      filtrados.forEach(prod => {
+        const col = document.createElement("div");
+        col.className = "col-12 col-md-4";
+        col.innerHTML = `
+          <div class="product">
+            <img src="${prod.imagem}" alt="${prod.nome}">
+            <h5>${prod.nome}</h5>
+            <p><strong>R$ ${prod.preco.toFixed(2)}</strong></p>
+            <button class="btn btn-outline-light btn-sm" onclick='adicionarCarrinho(${JSON.stringify(prod)})'>Adicionar ao pedido</button>
+          </div>`;
+        container.appendChild(col);
+      });
+    }
 
     function adicionarCarrinho(produto) {
       const item = carrinho.find(p => p.id === produto.id);
@@ -208,7 +213,9 @@
 
     function mostrarCarrinho() {
       atualizarCarrinho();
-      new bootstrap.Modal(document.getElementById("modalCarrinho")).show();
+      const modalEl = document.getElementById("modalCarrinho");
+      const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+      modal.show();
     }
 
     function enviarPedido() {
